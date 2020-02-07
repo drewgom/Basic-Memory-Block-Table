@@ -6,5 +6,6 @@
 void add_new_process(queue &queue_ref, memory_block_table &MBT);
 void show_mem_block_state(queue &queue_ref, memory_block_table &MBT);
 void terminate_process(queue &queue_ref, memory_block_table &MBT);
+void display_process(process_control_block* process);
 
 const int SIZE_OF_MEMORY = 512;
