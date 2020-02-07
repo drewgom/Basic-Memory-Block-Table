@@ -1,3 +1,4 @@
+
 // The Memory Block Table
 struct memory_block_table	{
 	int size;

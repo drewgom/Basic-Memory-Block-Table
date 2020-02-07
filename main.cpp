@@ -32,7 +32,11 @@ int main()	{
 				show_mem_block_state(ready_queue, mbt);
 				break;
 			case 3:
-				terminate_process(ready_queue, mbt);
+				int pid;
+				cout << "Please enter the process ID of the process you would like to terminate: " << endl;
+				cin >> pid;
+				cin.clear();
+				terminate_process(ready_queue, mbt, pid);
 				break;
 			case 4:
 				exit(0);
@@ -136,8 +140,22 @@ void show_mem_block_state(queue &queue_ref, memory_block_table &MBT)	{
 	
 }
 
-void terminate_process(queue &queue_ref, memory_block_table &MBT)	{
-	
+void terminate_process(queue &queue_ref, memory_block_table &MBT, int PID)	{
+		// This method will remove the process from the ready queue
+		process_control_block* terminatee = unqueue_process(queue_ref, MBT, PID);
+
+		if (terminatee != NULL)	{
+			// To free up the memory in the memory block table, we need to iterate through the page
+			// table and then mark every memory block in our page table as free
+
+			for (int i = 0; i < terminatee->process_size; i++)	{
+				MBT.block_status[terminatee->page_table[i]] = false;
+				MBT.num_open_blocks++;
+			}
+
+			delete terminatee->page_table;
+
+		}
 }
 
 
@@ -183,6 +201,69 @@ void display_process(process_control_block* process)	{
 		}
 }
 
+process_control_block* unqueue_process(queue &queue_ref, memory_block_table &MBT, int PID)	{
+	// First, we need to find the process that is to be removed
+	pcb_queue_node* current = queue_ref.front;
 
+	while (current != NULL) {
+		if (current->_process->process_ID == PID) break;
+		else current = current->next;
+	}
+
+	// When the while loop is done, there is one of two scenarios:
+	//	1. We located the process (current does not equal NULL)
+	// 	2. We did not locate the process (current is NULL)
+
+	if (current == NULL)	{
+		cout << "The process you are trying to terminate is not in the system." << endl;
+		return NULL;
+	} 
+
+	else	{
+		// When we need to terminate a process, we need to:
+		// 	1. Remove the process from the queue
+		//	2. Free up memory in the memory block table
+		// 	3. Deallocate the memory from the process
+
+		// To remove the process from the queue, we need to make the previous element in the queue's next value be the current element's next value.
+		// There are three special case for this:
+		//		1. If we only have one element
+		// 		1. If we are trying to delete the front element 
+		//		2. If we are trying to delete the back element
+		// To solve this, we will check first for a single element. If there is more that one element, 
+		// We will check for either of the last two cases. If that is so, we reassign these positions.
+
+		// Case 1: There is one element 
+
+		cout << "Found current: ID is " << current->_process->process_ID << endl;
+		if (current == queue_ref.front && current == queue_ref.back)	{
+			queue_ref.front = NULL;
+			queue_ref.back = NULL;
+		}
+		else {
+
+			if (current != queue_ref.front && current != queue_ref.back) {
+				current->previous->next = current->next;
+				current->next->previous = current->previous;
+			}
+
+			// Case 2: We are deleting the front
+			else if (current == queue_ref.front) {
+				queue_ref.front = queue_ref.front->next;
+				queue_ref.front->previous = NULL;
+			}
+	
+			// Case 3: We are deleting the back
+			else if (current == queue_ref.back)	{
+
+				queue_ref.back = queue_ref.back->previous;
+				queue_ref.back->next = NULL;
+			}
+			
+		}
+	}
+
+	return current->_process;
+}
 
 
