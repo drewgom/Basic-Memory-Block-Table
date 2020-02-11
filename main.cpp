@@ -5,9 +5,7 @@
 // main.cpp
 
 // I created this file to run the program assigned in the assignment. 
-
 #include <iostream>
-#include <iomanip>
 #include "main.h"
 
 using namespace std;
@@ -44,10 +42,11 @@ int main()	{
 				cout << "Please enter the process ID of the process you would like to terminate: " << endl;
 				cin >> pid;
 				cin.clear();
-				terminate_process(ready_queue, mbt, pid);
+				terminate_process(ready_queue, mbt, pid, true);
 				break;
 			case 4:
-				exit(0);
+				exit_sequence(ready_queue, mbt);
+				break;
 			default:
 				cout << "Invalid Selection. Please try again" << endl;
 				break;
@@ -155,7 +154,7 @@ void show_mem_block_state(queue &queue_ref, memory_block_table &MBT)	{
 
 
 // A function that does all the deallocation of a temrinated block
-void terminate_process(queue &queue_ref, memory_block_table &MBT, int PID)	{
+void terminate_process(queue &queue_ref, memory_block_table &MBT, int PID, bool display_error_message)	{
 		// This method will remove the process from the ready queue
 		process_control_block* terminatee = unqueue_process(queue_ref, MBT, PID);
 
@@ -172,6 +171,7 @@ void terminate_process(queue &queue_ref, memory_block_table &MBT, int PID)	{
 			delete terminatee->page_table;
 			delete terminatee;
 		}
+		else if(display_error_message) cout << "The process you are trying to terminate is not in the system." << endl;
 }
 
 
@@ -234,10 +234,7 @@ process_control_block* unqueue_process(queue &queue_ref, memory_block_table &MBT
 	//	1. We located the process (current does not equal NULL)
 	// 	2. We did not locate the process (current is NULL)
 
-	if (current == NULL)	{
-		cout << "The process you are trying to terminate is not in the system." << endl;
-		return NULL;
-	} 
+	if (current == NULL) return NULL;
 
 	else	{
 		// When we need to terminate a process, we need to:
@@ -285,3 +282,40 @@ process_control_block* unqueue_process(queue &queue_ref, memory_block_table &MBT
 }
 
 
+
+// A function to display the proper instruciotns when a user tries to exit
+void exit_sequence(queue &queue_ref, memory_block_table &MBT)	{
+	// Prompts the user on whether or not they would like to continue
+	pcb_queue_node* current = queue_ref.front;
+
+	if (current == NULL) cout << "There are no active processes on the system besides the OS." << endl;
+	else	{
+		cout << "The following processes are still running: " << endl;
+		while (current != NULL)	{
+			display_process(current->_process);
+			current = current->next;
+			cout << endl;
+		}
+	}
+	int choice;
+	cout << "Are you sure you would like to quit? (Enter 1 for YES, Enter 2 for NO): ";
+	cin >> choice;
+	cout << endl;
+
+	bool runLoop = true;
+
+	while (runLoop)	{
+		switch(choice)	{
+			case 1:
+				// This deallocates all the remaining processes before exiting
+				for (int i = 0; i <= process_control_block::LAST_USED_ID; i++) terminate_process(queue_ref, MBT, i, false);
+				exit(0);
+			case 2:
+				runLoop = false;
+				break;
+			default:
+				cout << "Invalid Selection. Please try again" << endl;
+				break;
+		}
+	}
+}
