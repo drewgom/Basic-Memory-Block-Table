@@ -1,3 +1,9 @@
+// Name: Andrew Gomez
+// Class: CECS 326
+// Assignment: Assignment 1
+// Due Date: Feb 11, 2020
+// main.h
+
 #include "OSstructures.h"
 #include <stdlib.h>
 #include <time.h> 

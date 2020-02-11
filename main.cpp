@@ -1,3 +1,11 @@
+// Name: Andrew Gomez
+// Class: CECS 326
+// Assignment: Assignment 1
+// Due Date: Feb 11, 2020
+// main.cpp
+
+// I created this file to run the program assigned in the assignment. 
+
 #include <iostream>
 #include <iomanip>
 #include "main.h"
@@ -56,7 +64,10 @@ int main()	{
 }
 
 
-
+// A function that:
+//	1. Generates a new process
+//	2. Adds that process to the memory block table
+//	3. Adds the process to the ready queue
 void add_new_process(queue &queue_ref, memory_block_table &MBT)	{
 	cout << "Adding new a process . . ." << endl;
 	// Generates a random number between 25 and 120 for the size of the new process.
@@ -109,7 +120,9 @@ void add_new_process(queue &queue_ref, memory_block_table &MBT)	{
 	}
 }
 
-
+// A funciton that shows:
+//	1. What memory blocks are occupied
+//	2. Every process in the ready queue
 void show_mem_block_state(queue &queue_ref, memory_block_table &MBT)	{
 	// The first step in displaying the system's state is to show which memory blocks are free.
 	cout << "CURRENT STATE: " << MBT.size - MBT.num_open_blocks << " blocks occupied, " << MBT.num_open_blocks << " blocks free." <<endl;
@@ -140,6 +153,8 @@ void show_mem_block_state(queue &queue_ref, memory_block_table &MBT)	{
 	
 }
 
+
+// A function that does all the deallocation of a temrinated block
 void terminate_process(queue &queue_ref, memory_block_table &MBT, int PID)	{
 		// This method will remove the process from the ready queue
 		process_control_block* terminatee = unqueue_process(queue_ref, MBT, PID);
@@ -153,13 +168,17 @@ void terminate_process(queue &queue_ref, memory_block_table &MBT, int PID)	{
 				MBT.num_open_blocks++;
 			}
 
+			// This deallocates the memory that was dynamcially allocated
 			delete terminatee->page_table;
-
+			delete terminatee;
 		}
 }
 
 
-
+// Displays the:
+//	1. The PID
+//	2. The size of the process
+// 	3. The page table
 void display_process(process_control_block* process)	{
 		// There are three things we should display:
 		//		1. The PID
@@ -193,7 +212,7 @@ void display_process(process_control_block* process)	{
 
 		// If our table's size was not a multiple of 16, then there are still some values that have not been displayed.
 		// This code is added to ensure that the rest of the contents get displayed.
-		if (last_value_displayed < process->process_size-1)	{
+		if (last_value_displayed < process->process_size)	{
 				while (last_value_displayed < process->process_size)	{
 					cout << setw(4) << process->page_table[last_value_displayed] << " ";
 					last_value_displayed++;
@@ -201,6 +220,7 @@ void display_process(process_control_block* process)	{
 		}
 }
 
+// A function that removes a process from the ready queue
 process_control_block* unqueue_process(queue &queue_ref, memory_block_table &MBT, int PID)	{
 	// First, we need to find the process that is to be removed
 	pcb_queue_node* current = queue_ref.front;
@@ -234,8 +254,6 @@ process_control_block* unqueue_process(queue &queue_ref, memory_block_table &MBT
 		// We will check for either of the last two cases. If that is so, we reassign these positions.
 
 		// Case 1: There is one element 
-
-		cout << "Found current: ID is " << current->_process->process_ID << endl;
 		if (current == queue_ref.front && current == queue_ref.back)	{
 			queue_ref.front = NULL;
 			queue_ref.back = NULL;

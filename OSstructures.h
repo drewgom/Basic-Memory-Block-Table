@@ -1,3 +1,9 @@
+// Name: Andrew Gomez
+// Class: CECS 326
+// Assignment: Assignment 1
+// Due Date: Feb 11, 2020
+// OSstructures.h
+
 
 // The Memory Block Table
 struct memory_block_table	{
@@ -61,11 +67,14 @@ struct queue						{
 	}
 
 	void pop()	{
+		pcb_queue_node* delete_value = front;
 		if (front != NULL && front != back) front = front->next;
 		else if (front == back)	{
 			front = NULL;
 			back = NULL;
 		}
+
+		delete delete_value;
 	}
 };
 
